@@ -1,6 +1,6 @@
 myTestRule{
 	
-	msiExecCmd("test.sh", *ARG,"null", "null", "null", *CMD_OUT);
+	msiExecCmd("parsing_metadata2iRODS.sh", *ARG,"null", "null", "null", *CMD_OUT);
 	msiGetStdoutInExecCmdOut(*CMD_OUT,*OUT);
 	#writeLine("stdout","*OUT");
 	*list=split(*OUT, "\n");

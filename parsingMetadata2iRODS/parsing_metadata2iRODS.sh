@@ -2,11 +2,11 @@
 
 
 main(){
-local execute nbLine
-namefile="$1"
+	locate namefile
+	namefile="$1"
 
-execute=$(python /home/ecamenen/Documents/python/test3.py $namefile)
-echo "$execute"
+	execute=$(python /home/ecamenen/Documents/git/GnpCNV/parsingMetadata2iRODS/parsing_metadata2iRODS.py $namefile)
+	echo "$execute"
 }
 
 main $1
