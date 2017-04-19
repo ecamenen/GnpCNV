@@ -1,5 +1,5 @@
 # -*-coding:Utf-8 -*
-"""A modulate that takes the metadata from an ad hoc file and associate them to a VCF file"""
+"""A module that takes the metadata from an ad hoc file and associate them to a VCF file"""
 
 #os.system("curl -u rods:rods -XPUT 'http://localhost:8080/irods-rest/rest/dataObject/tempZone/home/rods/test/test_new2.csv/metadata'  -H 'Accept: application/json' -H 'Content-type: application/json' -d '{\"metadataEntries\":[" + output + "]}'")
 
@@ -44,13 +44,14 @@ def escape(string):
 	for ch in ['\"','\'']:
 		if ch in string:
 			string=string.replace(ch,"\\"+ch)
-			return(string)
+	return(string)
 
 
 ###MAIN###
 
 for line in my_file:
 	if line!="\n":
+		line=escape(line)
 		key,value=line.split("\t")
 		value = value.rstrip()
 		cpt+=1
@@ -58,12 +59,29 @@ for line in my_file:
 			parsing+=","		
 		parsing+="{\"attribute\":\""+key+"\",\"value\":\""+value+"\"}"
 	else:
-		my_file.close()
-		print(data)
-		r = requests.put(url,headers=headers,data="{\"metadataEntries\":[" + parsing + "]}",auth=(user,password))
-		print(r.status_code)
-		print(r.content)
-		exit(0)
+		print(parsing)
+		try:
+			r = requests.put(url,headers=headers,data="{\"metadataEntries\":[" + parsing + "]}",auth=(user,password))
+			assert r.status_code == 200
+		except AssertionError:
+			if r.status_code == 401:
+				msg="Unrecognized users or password."
+			elif r.status_code == 403:
+				msg="Unauthorized users."
+			elif r.status_code == 404:
+				msg="File not found."
+			elif r.status_code == 408:
+				msg="Request Time-out."
+			print("Error: " + msg)
+			exit(r.status_code)
+
+#if r.status_code = 400:
+#	print("Erroneous request format.")
+
+# A FAIRE: fichier avec bcp de metadata
+
+my_file.close()
+exit(0)
 
 
 		
