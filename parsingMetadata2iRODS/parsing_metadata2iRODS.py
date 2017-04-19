@@ -10,28 +10,39 @@ import argparse
 
 ###HELP###
 
-if len(sys.argv) != 2:
-    print("Please enter only one parameter: the name of your metadata file.")
-    sys.exit(1)
+#if len(sys.argv) < 2:
+ #   print("Please enter only one parameter: the name of your metadata file.")
 
-parser = argparse.ArgumentParser()
-parser.add_argument("filename", help="the name of your metadata file")
-args = parser.parse_args()
+def help():
+	parser = argparse.ArgumentParser(description="A module that takes the metadata from an ad hoc file and associate them to a VCF file")
+	parser.add_argument("-c", dest="cnvFile", required="True", help="the name of your cnv file")
+	parser.add_argument("-m", dest="metadataFile", default="metadata.csv", help="the name of your metadata file (default: %(default)s)")
+	parser.add_argument("--user", "-u", default="rods", help="your iRODS user name (default: %(default)s)")
+	parser.add_argument("--pass", "-p", dest="password", default="rods", help="your iRODS password (default: %(default)s)")
+	parser.add_argument("-w", dest="workdir", default="/home/ecamenen/Documents/git/GnpCNV/dataTest", help="the workdirectory of your metadata file (default: your current one).")
+	parser.add_argument("-url", default="http://localhost:8080/irods-rest/rest/dataObject/tempZone/home/rods/test/", help="the workdirectory of your cnv file (default: your current one).")
+	args = parser.parse_args()
+	return args
+
+args=help()
+
+if len(sys.argv) < 2:
+	args.print_help()
+
 
 
 ###PARAMETERS###
 
-os.chdir("/home/ecamenen/Documents/git/GnpCNV/dataTest")
-filename=args.filename
-my_file=open(filename, 'r')
+
+os.chdir(args.workdir)
+metadataFile=open(args.metadataFile, 'r')
+user=args.user
+password=args.password
+
 parsing=""
 cpt=0
-outputFile='test_new.csv'
-#workdir=""
 
-url='http://localhost:8080/irods-rest/rest/dataObject/tempZone/home/rods/test/' + outputFile + '/metadata'
-user="rods"
-password="rods"
+url=args.url + args.cnvFile + '/metadata'
 headers=dict()
 headers['Content-type']='application/json'
 #headers['Accept']='application/json'
@@ -49,7 +60,7 @@ def escape(string):
 
 ###MAIN###
 
-for line in my_file:
+for line in metadataFile:
 	if line!="\n":
 		line=escape(line)
 		key,value=line.split("\t")
@@ -72,6 +83,8 @@ for line in my_file:
 				msg="File not found."
 			elif r.status_code == 408:
 				msg="Request Time-out."
+			else:
+				msg=r.reason
 			print("Error: " + msg)
 			exit(r.status_code)
 
@@ -80,7 +93,7 @@ for line in my_file:
 
 # A FAIRE: fichier avec bcp de metadata
 
-my_file.close()
+metadataFile.close()
 exit(0)
 
 
