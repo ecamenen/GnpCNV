@@ -1,26 +1,27 @@
 # -*-coding:Utf-8 -*
-"""Parsing a VCF file into an Excel metadata file used for NCBI submission"""
+'''Parsing a VCF file into an Excel metadata file used for NCBI submission'''
 
 
 import os
 import re
 import sys
+import vcf
 import argparse
 import openpyxl
 
 ###HELP###
 
 #if len ( sys.argv ) < 2:
- #   print ( "Please enter only one parameter: the name of your VCF file." )
+ #   print ( 'Please enter only one parameter: the name of your VCF file.' )
 
 def help() :
-	parser = argparse.ArgumentParser ( description = "Parsing a VCF file into an Excel metadata file used for NCBI submission" )
-	parser.add_argument ( "--vcf", dest = "vcfFilename", required = "True", help = "Name of your VCF file" )
-	parser.add_argument ( "--excel", dest = "excelFilename", required = "True", help = "Name of your VCF file" )
-	parser.add_argument ( "--exp", dest = "idExperiment", default = "1", help = "ID of your Experiment coming from NCBI's excel metadata ( default: %(default)s ) " )
-	parser.add_argument ( "--vcfWorkdir", default = "/home/ecamenen/Documents/", help = "Workdirectory of your VCF file ( default: your current one ) ." )
-	parser.add_argument ( "-excelWorkdir", default = "/home/ecamenen/Documents/", help = "Workdirectory of your excel file ( default: your current one ) ." )
-	parser.add_argument ( "--download", dest = "ifDownload", help = "Workdirectory of your excel file ( default: your current one ) ." )
+	parser = argparse.ArgumentParser ( description = 'Parsing a VCF file into an Excel metadata file used for NCBI submission' )
+	parser.add_argument ( '-vcf', dest = 'vcfFilename', required = 'True', help = 'Name of your VCF file' )
+	parser.add_argument ( '-xl', dest = 'excelFilename', required = 'True', help = 'Name of your VCF file' )
+	parser.add_argument ( '-exp', dest = 'idExperiment', default = '1', help = 'ID of your Experiment coming from NCBI\'s excel metadata ( default: %(default)s ) ' )
+	parser.add_argument ( '-vcfwd', dest = 'vcfWorkdir', default = '/home/ecamenen/Documents', help = 'Workdirectory of your VCF file ( default: your current one ) .' )
+	parser.add_argument ( '-xlwd', dest = 'excelWorkdir', default = '/home/ecamenen/Documents', help = 'Workdirectory of your excel file ( default: your current one ) .' )
+	#parser.add_argument ( '-dwld', dest = 'ifDownload', help = 'Download the metada excel file for NCBI submission.' )
 	args = parser.parse_args()
 	return args
 
@@ -31,59 +32,30 @@ if len ( sys.argv ) < 2:
 
 
 
-###PARAMETERS###
+###GLOBAL PARAMETERS###
 
 #os.listdir('.')
-#os.chdir()
-excelFile = openpyxl.load_workbook(args.vcfWorkdir + args.vcfFilename)
-sheet = excelFile.get_sheet_by_name('VARIANT CALLS')
+#os.chdir('/home/ecamenen/Documents/')
+#vcfFile = vcf.Reader(open('example_CNV.vcf'))
+vcfFile = vcf.Reader(open(args.vcfWorkdir + '/' + args.vcfFilename, 'r'))
 idExperiment = args.idExperiment
 
 #ajouter curl pour catch d'erreur de co
-try :
-	excelFilename = args.ifDownload
-	os.system('wget -P '+ os.getcwd() + ' https://www.ncbi.nlm.nih.gov/core/assets/dbvar/files/dbVarSubmissionTemplate_v3.3.xlsx')
-	excelWorkdir = os.getcwd()
-except:
-	excelFilename = args.excelFilename
-	excelWorkdir = args.excelWorkdir
-finally:
-	vcfFile = open(excelWorkdir + excelFilename, 'r')
+#try :
+#excelFilename = args.ifDownload
+#os.system('wget -P '+ os.getcwd() + ' https://www.ncbi.nlm.nih.gov/core/assets/dbvar/files/dbVarSubmissionTemplate_v3.3.xlsx')
+#excelWorkdir = os.getcwd()
+#except:
+excelFilename = args.excelFilename
+excelWorkdir = args.excelWorkdir
+#finally:
+excelFile = openpyxl.load_workbook(args.excelWorkdir + '/' + args.excelFilename)
+sheet = excelFile.get_sheet_by_name('VARIANT CALLS')
 
+#excelFile = openpyxl.load_workbook('dbVar4.xlsx')
 
-###FUNCTION####
-
-def parseChr ( chrField ) :
-	chr = re.search ( r"CHR (?P<chr>\w+)", chrField.upper() )
-	if ( re.match ( r"0", chr.group ( 'chr' ) ) ) :
-		chr = re.sub ( r"0 (?P<chr>\w+)", r"\g<chr>", chr.group ( 'chr' ) )
-	return chr
-
-###MAIN###
-
-cptVar = 0
-
-for record in vcfFile :
-	cptCall = -1
-	for callName in vcfFile.samples :
-		cptVar += 1
-		cptCall += 1
-		call = record.genotype ( callName )
-		parsingCall(record, cptCall)
-
-####FOOT###
-
-vcfFile.save(vcfFilename)
-vcfFile.close()
-exit(0)
-
-
-
-
-
-
-
-listVariantType = [
+#TODO
+listVariantType = (
 'complex substitution',
 'copy number gain',
 'copy number loss',
@@ -103,64 +75,40 @@ listVariantType = [
 'sequence alteration',
 'short tandem repeat variation',
 'tandem duplication'
-]
+)
 
-def parsingCall(record, call):
-	#list(string.ascii_uppercase[:6])
-	listColumn = ('A' , 'B', 'C', 'D', 'F', 'G', 'J', 'N', 'O', 'Q', 'U')
-listInputs = (cptVar, record.var_type, idExperiment, call.sample, setAssembly(), 
-	record.CHROM, record.POS, setOuterstop(), setInsertionLength(), setCopyNumber(),
-	)
-	for i in range(0 ,len(listColumn)):
-		setCell(listColumn[i], call, listInputs[i])
+
+
+
+###FUNCTIONS####
+
 
 def setCell ( column, line, parameter ) :
 	header = 4
 	sheet [ column + str ( header + line ) ].value  = parameter
 
-##call_id
-setCell ( 'A', cptCall, cptVar )
 
-##call_type
-#TODO
-setCell ( 'B', cptCall, record.var_type )
 
-##experiment id
-setCell ( 'C', cptCall, idExperiment )
-
-##sample id
-setCell ( 'D', cptCall, call.sample )
 
 ##assembly
 
-def setAssembly():
+def getAssembly() :
 	try:
-		assembly = vcfFile.metadata [ 'reference' ]
+		return vcfFile.metadata [ 'reference' ]
 	except KeyError:
 		try:
-			assembly = vcfFile.metadata [ 'assembly' ] #else the url is taken
+			return vcfFile.metadata [ 'assembly' ] #else the url is taken
 		except KeyError:
-			assembly = ''
+			return ''
 
-	return assembly
-
-setCell ( 'F', cptCall, assembly )
-
-
-##chrom
-setCell ( 'G', cptCall, record.CHROM )
-
-##start
-#record.affected_start + 1
-setCell ( 'J', cptCall, record.POS )
 
 ##outerstop
 #TODO: cas par defaut? END
 
-def calculateCallLength():
+def calculateCallLength() :
 	return record.INFO [ 'SVLEN' ] [ cptCall ]
 
-def setOuterstop():
+def getOuterstop() :
 	try:
 		#file.infos [ 'SVLEN' ]
 		outerstop = record.POS + calculateCallLength() + 1
@@ -169,126 +117,98 @@ def setOuterstop():
 	finally:
 		return outerstop
 
-setCell ( 'N', cptCall, outerstop )
 
 ##insertion length
 
 def roundCallLength ( callLength ) :
 		return str ( int ( round ( float ( callLength ) , 2 - len ( callLength ) ) ) )
 
-def setInsertionLength() :
-	if ( re.match ( r"^<(.)*>$", str ( record.ALT [ cptCall ] ) ) != None ) :
-		return '~' + roundCallLength ( str ( calculateCallLength() ) )
+#TODO: prévoir length neg pour insertion
+def getInsertionLength() :
+	if ( re.match ( r'^<(.)*>$', str ( record.ALT [ cptCall ] ) ) != None ) :
+		return '~' + abs(roundCallLength ( str ( calculateCallLength() ) ))
 	else:
 		return ''
-
-
-setCell ( 'O', cptCall, insertionLength() )
 
 
 ##copy number
 #sh [ 'Q' + str ( 4 + cptVar ) ] = len ( record.ALT )
 
-def getFormat():
-	return record.FORMAT.split ( ':' )
-
-def searchGQPos () :
+def searchCNPos () :
 	cpt = -1
-	for f in getFormat():
+	for f in record.FORMAT.split ( ':' ) :
 		cpt += 1
-		if ( re.match ( r"CN", f ) != None ) :
+		if ( re.match ( r'CN', f ) != None ) :
 			return cpt
 
-def setCopyNumber():
+def getCopyNumber() :
 	try:
 		return call.data [ searchCNPos () ]
-	except KeyError:
+	except TypeError:
 		return ''
 
 
 ##zygosity
+#TODO: taking account of '|' separator
 
-if call.gt_type != None :
-	if call.gt_type == 1 :
-		zygo = "Heterozygous"
-	else:
-		zygo = "Homozygous"
-else :
-	zygosity = call [ 'GT' ].split ( '/' ) #taking acount of polypoid case
-	for z in zygosity:
-		if z = =  '.' :
-			cptZ += 1
-		if cptZ == len ( zygosity ) :
-			zygo = ''
+def getZygosity () :
+	if call.gt_type != None :
+		if call.gt_type == 1 :
+			return 'Heterozygous'
+		else:
+			return 'Homozygous'
+	else :
+		cptZygo = 0
+		zygosity = call [ 'GT' ].split ( '/' ) #taking acount of polypoid case
+		for z in zygosity:
+			if z ==  '.' :
+				cptZygo += 1
+		if cptZygo == len ( zygosity ) :
+			return ''
 		else :
-			zygo = "Hemizygous"
-
-
-setCell ( 'U', cptCall, zygo)
+			return 'Hemizygous'
 
 
 
 
+###MAIN###
+
+def parsingCall(record, cptCall, cptVar) :
+	#list(string.ascii_uppercase[:6])
+	listColumn = ('A' , 'B', 'C', 'D', 'F', 'G', 'J', 'N', 'O', 'Q', 'U')
+	listInputs = (
+	cptVar,
+	record.var_type,
+	idExperiment,
+	call.sample,
+	getAssembly(),
+	record.CHROM,
+	record.POS,
+	getOuterstop(),
+	getInsertionLength(),
+	getCopyNumber(),
+	getZygosity()
+	)
+	for i in range(0 ,len(listColumn)):
+		setCell(listColumn[i], cptVar, listInputs[i])
 
 
+cptVar = 0
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-########
-
-
-
-
-
-
-
-
-
-for line in vcf:
-	if ( re.match ( r"^#", line ) != None ) :
-		match = re.search ( r"##assembly=(?P<assembly>\w+)", line )
-		if ( match != None ) :
-			assembly = match.group ( 'assembly' )
-		elif:
-			match = re.search ( r"##reference=(?P<ref>\w+)", line )
-			if ( match != None ) :
-				assembly = match.group ( 'ref' )
-	else:
-		line = re.split ( '\s{1, }', test )
+for record in vcfFile :
+	cptCall = -1
+	for callName in vcfFile.samples :
 		cptVar += 1
-		sh [ 'A' + str ( 4 + cptVar ) ].value =
-		for elt in line:
-			sh [ 'G' + str ( 4 + cptVar ) ].value = line [ 1 ]
-			sh [ 'J' + str ( 4 + cptVar ) ].value = line [ 2 ]
-			if ( elt != '.' ) :
-
-	else:
-		
-print ( cptVar )
-headers = line [ 9: ]
-
-#print ( 'Error: unexpected VCF format' )
-#A FAIRE: if/else a inverse pour diminuer complexité
+		print(cptVar)
+		cptCall += 1
+		call = record.genotype ( callName )
+		parsingCall(record, cptCall, cptVar)
 
 
 
+####FOOT###
+
+#excelFile.save(args.vcfWorkdir + '/' + args.vcfFilename)
+excelFile.save('dbVar4.xlsx')
+excelFile.close()
+exit(0)
