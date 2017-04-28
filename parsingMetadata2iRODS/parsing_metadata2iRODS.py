@@ -15,11 +15,13 @@ import argparse
 
 def help():
 	parser = argparse.ArgumentParser(description="A module that takes the metadata from an ad hoc file and associate them to a VCF file")
+	#TODO: ajouter workdir au namefile
 	parser.add_argument("-c", dest="cnvFile", required="True", help="the name of your cnv file")
 	parser.add_argument("-m", dest="metadataFile", default="metadata.csv", help="the name of your metadata file (default: %(default)s)")
 	parser.add_argument("--user", "-u", default="rods", help="your iRODS user name (default: %(default)s)")
 	parser.add_argument("--pass", "-p", dest="password", default="rods", help="your iRODS password (default: %(default)s)")
-	parser.add_argument("-w", dest="workdir", default="/home/ecamenen/Documents/git/GnpCNV/dataTest", help="the workdirectory of your metadata file (default: your current one).")
+	#parser.add_argument("-w", dest="workdir", default="/home/ecamenen/Documents/git/GnpCNV/dataTest", help="the workdirectory of your metadata file (default: your current one).")
+	#TODO: tempZone/home/rods/test a reflechir sur codage en dur sur cette partie
 	parser.add_argument("-url", default="http://localhost:8080/irods-rest/rest/dataObject/tempZone/home/rods/test/", help="the workdirectory of your cnv file (default: your current one).")
 	args = parser.parse_args()
 	return args
@@ -37,7 +39,7 @@ if len(sys.argv) < 2:
 os.chdir(args.workdir)
 metadataFile=open(args.metadataFile, 'r')
 user=args.user
-password=args.password
+password=args.passwordhtop
 
 parsing=""
 cpt=0
@@ -67,14 +69,17 @@ for line in metadataFile:
 		value = value.rstrip()
 		cpt+=1
 		if cpt!=1:
-			parsing+=","		
+			parsing+=","
+			#TODO: reflechir fonction attribution clé/valeur	
 		parsing+="{\"attribute\":\""+key+"\",\"value\":\""+value+"\"}"
+		#TODO: boucle while a la place de for et formatter en JSON a la fin (catcher aussi les erreurs de format)
+		#else, le mettre en fin de boucle
 	else:
-		print(parsing)
 		try:
 			r = requests.put(url,headers=headers,data="{\"metadataEntries\":[" + parsing + "]}",auth=(user,password))
 			assert r.status_code == 200
 		except AssertionError:
+			#refactoring sous forme d'une fonction unique
 			if r.status_code == 401:
 				msg="Unrecognized users or password."
 			elif r.status_code == 403:
