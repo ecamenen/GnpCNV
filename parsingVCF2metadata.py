@@ -1,7 +1,6 @@
 # -*-coding:Utf-8 -*
 '''Parsing a VCF file into an Excel metadata file used for NCBI submission'''
 
-
 import os
 import re
 import sys
@@ -11,33 +10,27 @@ import openpyxl
 
 ###HELP###
 
-#if len ( sys.argv ) < 2:
- #   print ( 'Please enter only one parameter: the name of your VCF file.' )
-
 def help() :
 	parser = argparse.ArgumentParser ( description = 'Parsing a VCF file into an Excel metadata file used for NCBI submission' )
-	parser.add_argument ( '-vcf', dest = 'vcfFilename', required = 'True', help = 'Full path and name of your VCF file' )
-	parser.add_argument ( '-xl', dest = 'excelFilename', required = 'True', help = 'Full path and name of your VCF file' )
-	parser.add_argument ( '-exp', dest = 'idExperiment', default = '1', help = 'ID of your Experiment coming from NCBI\'s excel metadata ( default: %(default)s ) ' )
-	#parser.add_argument ( '-vcfwd', dest = 'vcfWorkdir', default = '/home/ecamenen/Documents', help = 'Workdirectory of your VCF file ( default: your current one ) .' )
-	#parser.add_argument ( '-xlwd', dest = 'excelWorkdir', default = '/home/ecamenen/Documents', help = 'Workdirectory of your excel file ( default: your current one ) .' )
+	parser.add_argument ( '-vcf', dest = 'vcfFilename', required = 'True', help = 'Path of your VCF file' )
+	parser.add_argument ( '-xl', dest = 'excelFilename', required = 'True', help = 'Path of your Excel metadata file' )
+	parser.add_argument ( '-exp', dest = 'idExperiment', default = '1', help = 'ID of your Experiment coming from NCBI\'s excel metadata (default: %(default)s)')
 	#TODO ?
 	#parser.add_argument ( '-dwld', dest = 'ifDownload', help = 'Download the metada excel file for NCBI submission.' )
-	args = parser.parse_args()
-	return args
+	return parser
 
-args = help()
+parser = help()
 
 if len ( sys.argv ) < 2:
-	args.print_help()
+	parser.print_help()
 
 
+args = parser.parse_args()
 
 ###GLOBAL PARAMETERS###
 
 #os.listdir('.')
 #os.chdir('/home/ecamenen/Documents/')
-#os.chdir(args.vcfWorkdir)
 #vcfFile = vcf.Reader(open('example_CNV.vcf'))
 #vcfFile = vcf.Reader(open('vcf_sample.vcf'))
 vcfFile = vcf.Reader(open(args.vcfFilename, 'r'))
@@ -129,8 +122,6 @@ def getOuterstop() :
 		return record.POS + calculateCallLength() + 1
 
 
-
-
 ##insertion length
 
 def roundCallLength ( callLength ) :
@@ -186,7 +177,7 @@ def getZygosity () :
 
 
 ###MAIN###
-
+#TODO: var_type
 def parsingCall(record, cptCall, cptVar) :
 	#list(string.ascii_uppercase[:6])
 	listColumn = ('A' , 'B', 'C', 'D', 'F', 'G', 'J', 'N', 'O', 'Q', 'U')

@@ -1,8 +1,6 @@
 # -*-coding:Utf-8 -*
 """A module that takes the metadata from an ad hoc file and associate them to a VCF file"""
 
-#os.system("curl -u rods:rods -XPUT 'http://localhost:8080/irods-rest/rest/dataObject/tempZone/home/rods/test/test_new2.csv/metadata'  -H 'Accept: application/json' -H 'Content-type: application/json' -d '{\"metadataEntries\":[" + output + "]}'")
-
 import os
 import sys
 import json
@@ -10,9 +8,6 @@ import requests
 import argparse
 
 ###HELP###
-
-#if len(sys.argv) < 2:
- #   print("Please enter only one parameter: the name of your metadata file.")
 
 def help():
 	parser = argparse.ArgumentParser(description="A module that takes the metadata from an ad hoc file and associate them to a VCF file")
@@ -23,14 +18,15 @@ def help():
 	parser.add_argument("-z", dest="zoneName", default="tempZone", help="your zone name (default: %(default)s)")
 	#TODO: tempZone/home/rods/test a reflechir sur codage en dur sur cette partie
 	parser.add_argument("-url", default="http://localhost:8080/irods-rest/rest/dataObject/", help="the workdirectory of your cnv file (default: your current one).")
-	args = parser.parse_args()
-	return args
+	return parser
 
-args=help()
+parser = help()
 
-if len(sys.argv) < 2:
-	args.print_help()
+if len ( sys.argv ) < 2:
+	parser.print_help()
 
+
+args = parser.parse_args()
 
 
 ###PARAMETERS###
