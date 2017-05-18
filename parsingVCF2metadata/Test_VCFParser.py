@@ -34,16 +34,27 @@ class Test(unittest.TestCase):
         dummySheet.append(['5', 'sv', '1', 'NA00001', '', '1000Genomes', '3', '', '', '12665100', '', '', '', '12686201', '~21000', '', '3', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''])
         dummySheet.append(['6', 'sv', '1', 'NA00001', '', '1000Genomes', '4', '', '', '18665128', '', '', '', '18665205', '~76', '', '5', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''])
         dummyExcel.save(self._excelFile)
-        dummyExcel.close()    
+        dummyExcel.close()
         
-    def writeDummyVCF(self, boolReferenceFile = True, reference='1000Genomes', assembly='http://urlAssembly.com'):
+    def writeDummyVCF(self, boolReferenceFile = True, reference='1000Genomes', assembly='http://urlAssembly.com', boolALTHeaders = True, version = '4.0'):
         dummyVCF=open(self._vcfFile, 'w')
-        dummyVCF.write('##fileformat=VCFv4.0\n')
+        dummyVCF.write('##fileformat=VCFv' + version + '\n')
         if boolReferenceFile == True :
             dummyVCF.write('##reference=' + reference + '\n')
+        if boolALTHeaders == True :
+            dummyVCF.write('##ALT=<ID=DEL,Description="Deletion">\n')
+            dummyVCF.write('##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">\n')
+            dummyVCF.write('##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">\n')
+            dummyVCF.write('##ALT=<ID=DUP,Description="Duplication">\n')
+            dummyVCF.write('##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">\n')
+            dummyVCF.write('##ALT=<ID=INS,Description="Insertion of novel sequence">\n')
+            dummyVCF.write('##ALT=<ID=INS:ME:ALU,Description="Insertion of ALU element">\n')
+            dummyVCF.write('##ALT=<ID=INS:ME:L1,Description="Insertion of L1 element">\n')
+            dummyVCF.write('##ALT=<ID=INV,Description="Inversion">\n')
+            dummyVCF.write('##ALT=<ID=CNV,Description="Copy number variable region">\n')
         dummyVCF.write('##assembly=' + assembly + '\n')
         dummyVCF.write('#CHROM  POS   ID  REF ALT   QUAL  FILTER  INFO  FORMAT  NA00001\n')
-        dummyVCF.write('1 2827693   . CCGTGGATGCGGGGACCCGCATCCCCTCTCCCTTCACAGCTGAGTGACCCACATCCCCTCTCCCCTCGCA  C . PASS  SVTYPE=DEL;END=2827680;BKPTID=Pindel_LCS_D1099159;HOMLEN=1;HOMSEQ=C;SVLEN=-66 GT:GQ 1/1:13.9\n')
+        dummyVCF.write('1 2827693   . CCGTGGATGCGGGGACCCGCATCCCCTCTCCCTTCACAGCTGAGTGACCCACATCCCCTCTCCCCTCGCA  C . PASS  SVTYPE=DEL;END=2827680;BKPTID=Pindel_LCS_D1099159;HOMLEN=1;HOMSEQ=C GT:GQ 1/1:13.9\n')
         dummyVCF.write('9311_chr02 321682    . T <DEL>   6 PASS    IMPRECISE;SVTYPE=DEL;END=321887;SVLEN=-105;CIPOS=-56,20;CIEND=-10,62  GT:GQ 0/1:12\n')
         dummyVCF.write('2 14477084  . C <DEL:ME:ALU>  12  PASS  IMPRECISE;SVTYPE=DEL;END=14477381;SVLEN=-297;MEINFO=AluYa5,5,307,+;CIPOS=-22,18;CIEND=-12,32  GT:GQ 1/1/.:12\n')
         dummyVCF.write('3 9425916   . C <INS:ME:L1> 23  PASS  IMPRECISE;SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22;MIINFO=L1HS,1,6025,- GT:GQ 1/1:15\n')
@@ -69,24 +80,31 @@ class Test(unittest.TestCase):
             #print line
         return parsing
     
-    def createFiles(self, boolReferenceFile = True, observedReference='1000Genomes', expectedAssembly='1000Genomes'):
+    def createFiles(self, boolReferenceFile = True, observedReference='1000Genomes', expectedAssembly='1000Genomes', boolALTHeaders = True, version = '4.0'):
         self.writeDummyExcel()
-        self.writeDummyVCF(boolReferenceFile, observedReference, 'http://urlAssembly.com')
+        self.writeDummyVCF(boolReferenceFile, observedReference, 'http://urlAssembly.com', boolALTHeaders, version)
         return VCFParser(open(self._vcfFile), self._excelFile, 1)
     
-    def getRecord(self,  timeNext=1):
-        iVcfParser = self.createFiles()
+    def getRecord(self,  timeNext=1, boolALTHeaders = True):
+        iVcfParser = self.createFiles(boolALTHeaders = boolALTHeaders)
         for i in range(0, timeNext):
             record = next(iVcfParser)
         #print record
         return record
 
-    def getCall(self, timeNextRecord = 1, timeNextCall=1):
-        record = self.getRecord(timeNextRecord)
+    def getCall(self, timeNextRecord = 1, timeNextCall=1, boolALTHeaders = True):
+        record = self.getRecord(timeNextRecord, boolALTHeaders)
         for i in range(0, timeNextCall):
             call = next(record)
         #print call
         return call
+        
+    def test_VCF_getVersion (self):
+        iVcfParser = self.createFiles()
+        iVcfParser = self.createFiles(version='4.2')
+        iVcfParser = self.createFiles(version='5')
+        iVcfParser = self.createFiles(version='')
+
         
     def VCF_getAssembly(self, boolReferenceFile = True, observedReference='1000Genomes', expectedAssembly='1000Genomes'):
         iVcfParser = self.createFiles(boolReferenceFile, observedReference, expectedAssembly)
@@ -127,7 +145,7 @@ class Test(unittest.TestCase):
         #print parsedCN
         self.assertEquals(parsedCN, expectedCN)
         
-    def call_getInsertionLength(self, timeNextRecord = 1, expectedInsertionLength=66, timeNextCall = 1):
+    def call_getInsertionLength(self, timeNextRecord = 1, expectedInsertionLength=69, timeNextCall = 1):
         call=self.getCall(timeNextRecord,timeNextCall)
         parsedInsertionLength=call.getInsertionLength()
         #print parsedInsertionLength
@@ -137,18 +155,19 @@ class Test(unittest.TestCase):
         #TODO: absolute or not ?
         self.call_getInsertionLength()
         self.call_getInsertionLength(2,'~100')
+        self.call_getInsertionLength(3,'~300') # '.' case and polyploidy
         
-    def call_calculateCallLength(self, timeNextRecord = 1, expectedLength=-66, timeNextCall = 1):
+    def call_calculateAlleleLength(self, timeNextRecord = 1, expectedLength=69, timeNextCall = 1):
         call=self.getCall(timeNextRecord,timeNextCall)
-        parsedLength=call.calculateCallLength()
+        parsedLength=call.calculateAlleleLength()
         #print parsedLength
         self.assertEquals(parsedLength, expectedLength)
         
-    def test_call_calculateCallLength(self):
-        self.call_calculateCallLength()
-        self.call_calculateCallLength(2,-105)
+    def test_call_calculateAlleleLength(self):
+        self.call_calculateAlleleLength()
+        self.call_calculateAlleleLength(2,-105)
         
-    def call_getOuterstop(self, timeNextRecord = 1, expectedOuterstop = 2827628, timeNextCall = 1):
+    def call_getOuterstop(self, timeNextRecord = 1, expectedOuterstop = 2827763, timeNextCall = 1):
         call=self.getCall(timeNextRecord,timeNextCall)
         parsedOuterstop=call.getOuterstop()
         #print parsedOuterstop
@@ -158,14 +177,22 @@ class Test(unittest.TestCase):
         self.call_getOuterstop()
         self.call_getOuterstop(4,9431944)
         
-    def test_record_varType(self):
-        record=self.getRecord()
-        #TODO:
-        self.assertEquals(record.var_type,'sv')
+    def call_getVarType(self, timeNextRecord = 1, expectedVarType = 'deletion', timeNextCall = 1, boolALTHeaders = True):
+        call=self.getCall( timeNextRecord,timeNextCall, boolALTHeaders )
+        #print call.site
+        parsedVarType=call.getVarType()
+        #print VCFParser.headerAlt
+        self.assertEquals( parsedVarType, expectedVarType )
         
-    def test_call_varType(self):
-        call=self.getCall()
-        self.assertEquals(call.sample,'NA00001')
+    def test_call_getVarType(self):
+        self.call_getVarType()
+        self.call_getVarType(3)
+        self.call_getVarType(4, 'LINE1 insertion')
+        self.call_getVarType(5, 'duplication')
+        self.call_getVarType(boolALTHeaders = False)
+        self.call_getVarType(3, boolALTHeaders = False)
+        self.call_getVarType(4, 'LINE1 insertion', boolALTHeaders = False)
+        self.call_getVarType(5, 'duplication', boolALTHeaders = False)
     
     def test_VCF_parseVCF(self):
         iVcfParser = self.createFiles()
