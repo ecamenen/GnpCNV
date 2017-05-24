@@ -1,11 +1,11 @@
 # -*-coding:Utf-8 -*
 """A module that takes the metadata from an ad hoc file and associate them to a VCF file"""
 
-import os
-import sys
-import json
-import requests
-import argparse
+import os, sys, json, requests, argparse
+from irods.session import iRODSSession
+from irods import exception as iExc
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 ###HELP###
 
@@ -15,9 +15,10 @@ def help():
 	parser.add_argument("-m", dest="metadataFile", default="/home/ecamenen/Documents/metadata.csv", help="the name of your metadata file (default: %(default)s)")
 	parser.add_argument("--user", "-u", default="rods", help="your iRODS user name (default: %(default)s)")
 	parser.add_argument("--pass", "-p", dest="password", default="rods", help="your iRODS password (default: %(default)s)")
-	parser.add_argument("-z", dest="zoneName", default="tempZone", help="your zone name (default: %(default)s)")
-	#TODO: tempZone/home/rods/test a reflechir sur codage en dur sur cette partie
-	parser.add_argument("-url", default="http://localhost:8080/irods-rest/rest/dataObject/", help="the workdirectory of your cnv file (default: your current one).")
+	parser.add_argument("--zone", default="tempZone", help="your zone name (default: %(default)s)")
+	parser.add_argument("--port", default=1247, help="the number of your port (default: %(default)s)")
+	parser.add_argument("-host", default="localhost", help="the workdirectory of your cnv file (default: your current one).")
+	#client_user='another_user', client_zone='another_zone
 	return parser
 
 parser = help()
@@ -31,54 +32,48 @@ args = parser.parse_args()
 
 ###PARAMETERS###
 
-
+cnvFile = args.cnvFile
 metadataFile=open(args.metadataFile, 'r')
 user=args.user
-password=args.password
-url=args.url + args.zoneName + '/home/' + args.user + args.cnvFile + '/metadata'
+password = args.password
+zone = args.zone
+port = args.port
+host = args.host
 
-metadata={}
-metadata['metadataEntries'] = []
+#sess = iRODSSession(host=host, port=port, user=user, password=password, zone=zoneName, client_user='another_user', client_zone='another_zone')
 
-headers={}
-headers['Content-type']='application/json'
+sess = iRODSSession(host=host, port=int(port), user=user, password=password, zone=zone)
+
+try:
+	obj = sess.data_objects.get("/" + zone + "/home/" + user + cnvFile)
+	#refactoring exception?
+except iExc.DataObjectDoesNotExist:
+	print ("Object does not exist : " + cnvFile); exit(1)
+except (ValueError, iExc.NetworkException):
+	print ("Could not connect to specified host and port: " + host + ":" + port)
+except iExc.CAT_INVALID_USER:
+	print ("Invalid user: " + user); exit(1)
+except iExc.CAT_INVALID_AUTHENTICATION:
+	print ("Invalid password"); exit(1)
+except iExc.CollectionDoesNotExist:
+	print ("Collection does not exist : " + zone); exit(1)
+	#autre??
+
 
 
 ###MAIN###
+
 
 for line in metadataFile:
 	if line!="\n":
 		key,value=line.split("\t")
 		value = value.rstrip()
-		parsing={}
-		parsing['attribute']=key
-		parsing['value']=value
-		#TODO: boucle while a la place de for + catcher aussi les erreurs de format
-		metadata['metadataEntries'].append(parsing)
+		try:
+			obj.metadata.add(key,value)
+		except iExc.CATALOG_ALREADY_HAS_ITEM_BY_THAT_NAME:
+			pass
 
-try:
-	r = requests.put(url,headers=headers,data=json.dumps(metadata),auth=(user,password))
-	print(r.status_code)
-	assert r.status_code == 200
-except AssertionError:
-	#refactoring sous forme d'une fonction unique
-	if r.status_code == 401:
-		msg="Unrecognized users or password."
-	elif r.status_code == 403:
-		msg="Unauthorized users."
-	elif r.status_code == 404:
-		msg="File not found."
-	elif r.status_code == 408:
-		msg="Request Time-out."
-	else:
-		msg=r.reason
-	print("Error: " + msg)
-	exit(r.status_code)
-
-#if r.status_code = 400:
-#	print("Erroneous request format.")
-
-# A FAIRE: fichier avec bcp de metadata
+# TODO: fichier avec bcp de metadata
 
 metadataFile.close()
 exit(0)
