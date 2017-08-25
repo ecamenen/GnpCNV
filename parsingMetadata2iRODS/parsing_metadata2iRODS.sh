@@ -3,11 +3,11 @@
 
 main(){
 	locate namefile
-	namefile="$1"
+	namefile="$@"
 
-	execute=$(python /home/ecamenen/Documents/git/GnpCNV/parsingMetadata2iRODS/parsing_metadata2iRODS.py $namefile)
-	echo "$execute"
+	CMD="/usr/bin/python2.7 /var/lib/irods/iRODS/server/bin/cmd/parsingMetadata2iRODS_libraryiRODS.py "$namefile
+	eval $CMD
 }
 
-main $1
-
+echo "begin bash"
+main $@

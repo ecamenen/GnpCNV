@@ -46,7 +46,7 @@ class VCFParser(vcf.parser.Reader):
 		return Record2(record, vcfFile, idExperiment)
 	
 	def getVCFversion (self):
-		version = re.search ( r"VCFv(?P<version>\w+)", self.metadata['fileformat'] )
+		version = re.search ( r"VCFv(?P<version>[\w.]+)*", self.metadata['fileformat'] )
 		msg = 'this script is fitted for an older VCF version (v4.2)'
 		if ( version != None):
 			if ( float(version.group('version')) > 4.2) :
@@ -124,6 +124,8 @@ class Record2 ( vcf.model._Record ):
 		if ( chr != None):
 			if ( re.match ( r"0", chr.group ( 'chr' ) ) != None) :
 				chr = re.sub ( r"0(?P<chr>\w+)", r"\g<chr>", chr.group ( 'chr' ) )
+			else:
+				chr = chr.group ( 'chr' )
 		else:
 			chr = self.CHROM
 		return chr
@@ -210,11 +212,18 @@ class Call2(vcf.model._Call):
 			return ''
 		
 	def getInsertionLength ( self ) :
-		if ( re.match ( r'^<(.)*>$', str ( self.site.ALT [ 0 ] ) ) != None ) :
-			return '~' + self.roundCallLength ( str ( self.calculateAlleleLength() ) )
+		if self.gt_type != 0:
+			if self.calculateAlleleLength()!='':
+				if ( re.match ( r'^<(.)*>$', str ( self.site.ALT [ 0 ] ) ) != None ) :
+					return '~' + self.roundCallLength ( str ( self.calculateAlleleLength() ) )
+				else:
+					return str ( abs( self.calculateAlleleLength() ) )
+			else:
+				return ''
 		else:
-			return str ( abs( self.calculateAlleleLength() ) )
-		
+			return ''
+	
+	#TODO: envisager possibilite de prendre en compte tag INFO CISPOS et CISEND	
 	def roundCallLength (self, callLength) :
 			return str ( abs( int ( round ( float ( callLength ) , 2 - len ( callLength ) ) ) ) )
 		
@@ -224,15 +233,20 @@ class Call2(vcf.model._Call):
 			alleles = self[ 'GT' ].split ( '/' )
 			for a in alleles :
 				if (a != '0' and a != '.'):
-					a = int(a) -1
-					result = self.calculateLength(a)
-					if result < 0 : # cas deletion 
-						if length > result :
-							length = result
-					else:
-						if length < result :
-							length = result
+					try:
+						a = int(a) -1
+						result = self.calculateLength(a)
+						if result < 0 : # cas deletion 
+							if length > result :
+								length = result
+						else:
+							if length < result :
+								length = result
+					except ValueError:
+						return '' # cas GT=string, p.ex 'na', erreur a la convertion en int
 			return length
+		else:
+			return len( self.site.REF )
 	
 	def calculateLength (self, cptAllele) :
 		try:
@@ -244,7 +258,10 @@ class Call2(vcf.model._Call):
 				return ''
 			
 	def getOuterstop (self) :
-			return self.site.POS + self.calculateAlleleLength() + 1
+		if self.calculateAlleleLength()!='':
+			return self.site.POS + self.calculateAlleleLength()
+		else:
+			return ''
 	
 	def parsingCall(self) :
 		listColumn = ('A' , 'B', 'C', 'D', 'F', 'G', 'J', 'N', 'O', 'Q', 'U')
@@ -267,6 +284,9 @@ class Call2(vcf.model._Call):
 	#TODO: sequence variant
 	#TODO: ???? variant region ID(evidence, support, support count: probe) (log2)
 	#TODO: breakpoint, contig
+	
+	#genome du mais, vigne ?
+	#champ propre pour contigs = assemly pseudomolecultype( chromosome, scafold, contig)
 				
 #if __name__ == "__main__":
 #	pass

@@ -6,7 +6,7 @@
 '''
 
 import argparse, sys
-from myProject.VcfParser import *
+from VcfParser import *
 
 def help() :
     parser = argparse.ArgumentParser ( description = 'Parsing a VCF file into an Excel metadata file used for NCBI submission' )
@@ -29,13 +29,13 @@ class Launcher:
     def __init__(self, vcfFilename, excelFilename, idExperiment):
         Call2.cptVar = 0
         VCFParser.dbVar = DbVarWriter(excelFilename)
-        self.vcf = VCFParser(open(vcfFilename), excelFilename, idExperiment)
+        self.vcfFile = VCFParser(open(vcfFilename, 'r'), excelFilename, idExperiment)
 
 
 
 if __name__ == '__main__':
     launch = Launcher(args.vcfFilename, args.excelFilename, args.idExperiment)
-    launch.vcf.parseVCF()
-    launch.vcf.dbVar.write()
+    launch.vcfFile.parseVCF()
+    launch.vcfFile.dbVar.write()
     print ('\nVCF file has been parsed successfully.')
     
