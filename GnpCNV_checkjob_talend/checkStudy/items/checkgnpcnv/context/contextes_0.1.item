@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<talendfile:ContextType xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:talendfile="platform:/resource/org.talend.model/model/TalendFile.xsd" xmi:id="_uPm3AIJ_EeeBiIEr4z_pEw" confirmationNeeded="false" name="Default">
+  <contextParameter xmi:id="_uPm3AYJ_EeeBiIEr4z_pEw" comment="" name="workdir" prompt="workdir?" promptNeeded="false" type="id_Directory" value=""/>
+  <contextParameter xmi:id="_uPm3AoJ_EeeBiIEr4z_pEw" comment="" name="excelFileIn" prompt="excelFileIn?" promptNeeded="false" type="id_File" value=""/>
+  <contextParameter xmi:id="_uPm3A4J_EeeBiIEr4z_pEw" comment="" name="encoding" prompt="encoding?" promptNeeded="false" type="id_String" value=""/>
+  <contextParameter xmi:id="_uPm3BIJ_EeeBiIEr4z_pEw" comment="" name="properties" prompt="properties?" promptNeeded="true" type="id_File" value="/home/ecamenen/Documents/git/GnpCNV/talend/context.properties"/>
+  <contextParameter xmi:id="_uPm3BYJ_EeeBiIEr4z_pEw" comment="" name="tab" prompt="tab?" promptNeeded="false" type="id_String" value=""/>
+  <contextParameter xmi:id="_uPm3BoJ_EeeBiIEr4z_pEw" comment="" name="dbVarSubmit" prompt="dbVarSubmit?" promptNeeded="false" type="id_String" value=""/>
+  <contextParameter xmi:id="_koS24IgDEeeFBddFMd5vVA" comment="" name="storageDir" prompt="storageDir?" promptNeeded="false" type="id_Directory" value=""/>
+</talendfile:ContextType>
