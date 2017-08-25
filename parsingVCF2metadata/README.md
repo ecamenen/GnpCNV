@@ -61,7 +61,7 @@ _*Méthodes  :*_
 
  *_Attributs :_*
  
-« vcfFile », « cptCall », « idExperiment » et un attribut de classe « cptVar » incrémenté à chaque instanciation.
+- « vcfFile », « cptCall », « idExperiment » et un attribut de classe « cptVar » incrémenté à chaque instanciation.
 
 _*Méthodes  :*_
 - getVarType: formate en vocabulaire contrôlé dbVar le résultat d’un parsing du type de polymorphisme (e.g., SNP, INDEL, etc. ; fonction var_type(), héritée de l’objet « Call »). En cas de match avec un CNV, recherche la clé correspondante dans le dictionnaire headerAlt de la classe VCFParser et retourne la valeur format dbVar associée. S’il n’y a pas de métadonnées et que le dictionnaire est vide, appel à la fonction parsingAlt.
