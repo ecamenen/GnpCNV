@@ -1,4 +1,5 @@
 *OBJECTIFS*
+
 Des métadonnées, un trackList et deux jeux de données ont été intégrés à la dernière version (3.0) du JBrowse de peuplier:
 * une piste de SNP récupéré sur le site de Phytozome ([https://plantgenie.org/Data/PopGenIE/Populus_trichocarpa/v3.0/v10.1/VCF/P.trichocarpa.gatk.hap.bed.filter.snp.rm_indel.bed.biallelic.DP5.GQ10.rm_missing.recode.vcf])
 * une piste de CNV extrait du tableau 5 et 6 du matériel supplémentaire de Pinosio et al (2006; [https://academic.oup.com/mbe/article/33/10/2706/2925611/Characterization-of-the-Poplar-Pan-Genome-by])
