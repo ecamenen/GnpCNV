@@ -56,6 +56,7 @@ _*Méthodes  :*_
 - parseChr : parse et formate le numéro du chromosome
 ---
 *Call2 (call , record , vcfFile, idExperiment, cptCall)*
+
  *_Attributs :_*
 « vcfFile », « cptCall », « idExperiment » et un attribut de classe « cptVar » incrémenté à chaque instanciation.
 
