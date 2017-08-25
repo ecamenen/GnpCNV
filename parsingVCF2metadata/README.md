@@ -48,7 +48,9 @@ _*Méthodes  :*_
 
 ---
 h3. *Record2(record, vcfFile, idExperiment)* 
+
 *_Attributs :_*
+
 - « vcfFile », « cptCall » (un compteur du nombre de variants parsés), « idExperiment », « call » un variant (objet « call »), initialisé avec celui en première position de la liste contenue dans l’objet Record2.
 
 _*Méthodes  :*_
@@ -58,6 +60,7 @@ _*Méthodes  :*_
 *Call2 (call , record , vcfFile, idExperiment, cptCall)*
 
  *_Attributs :_*
+ 
 « vcfFile », « cptCall », « idExperiment » et un attribut de classe « cptVar » incrémenté à chaque instanciation.
 
 _*Méthodes  :*_
