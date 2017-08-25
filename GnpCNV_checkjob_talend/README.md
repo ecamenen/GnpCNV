@@ -4,6 +4,7 @@
 * séparer les champs utiles (futures métadonnées iRODS) de ceux réservés à une soumission au NCBI
 * créer en sortie le fichier metadata.csv qui servira de base aux métadonnées iRODS
 
+---
 *Orchestration*
 
 Ses variables de contexte [^context.properties] sont les suivantes :
@@ -14,10 +15,10 @@ Ses variables de contexte [^context.properties] sont les suivantes :
 * storageDir, le chemin du dossier où sont stockés les patron des fichiers staticData.tmp et éventuellement dbVar.xlsx (ex: /home/ecamenen/Documents/git/GnpCNV/)
 
 Ce job d'orchestration (au nom original 'orchestration') permet d'exécuter un premier job permettant de vérifier le remplissage du GnpCNV et de créer un fichier CSV de métadonnées de standards "machine readable". Si dbVarSubmit vaut 'yes', un second job est activé et permettant de créer un fichier au format dbVar (base de variant du NCBI) pour une soumission par l'utilisateur.
-
+---
 *CheckOrchestration*
 
-h2. Objectifs
+*Objectifs*
 Ce Talend vise à vérifier le format GnpCNV (métadonnées d'analyse de CNV) rempli par un utilisateur dans le cadre du projet CNV4Sel. 
 
 Il permet également de produire un fichier CSV de métadonnées standardisés et issus de certains champs extraits du GnpCNV et renommé pour correspondre avec certains champs des standards internationaux:
@@ -29,7 +30,7 @@ Il permet également de produire un fichier CSV de métadonnées standardisés e
 
 Ce fichier de métadonnées standardisés permettra d'attribuer ces métadonnées sous iRODS aux fichiers issus d'une soumission CNV4Sel
 
-h2. Resultats
+*Resultats*
 
 Chacun des sous-jobs concernant un onglet du fichier de métadonnées CNV4Sel (GnpCNV) est orchestré par le job CheckOrchestration. Lui-même est orchestré par un super-job au nom original : "orchestration" ([https://urgi.versailles.inra.fr/jira/browse/GNP-4856]). 
 
@@ -64,14 +65,14 @@ Deux catégories d'onglet ont fait l'objet de traitement particulier:
 {color:#cccccc} * Si l'onglet contient d'autres lignes, le cinquième sous-job de vérification de l'onglet Contact sera similaire à celui des autres onglets (dans leur cas, correspondant à leur troisième sous-job) à la différence que le tMap utilisera un filtre d'expression comme pour la première ligne 'Submitter'.
 * Comme pour les autres contacts, les erreurs capturées dans des buffer seront enregistrés dans un fichier .bad {color}
 
-
+---
 *convert2dbVar*
 
-h2. Objectifs
+*Objectifs*
 
 Ce job Talend ("convert2dbVar") permet au curateur de créer un nouveau fichier au format dbVar (base de variant du NCBI) téléchargeable ici: [https://www.ncbi.nlm.nih.gov/core/assets/dbvar/files/dbVarSubmissionTemplate_v3.3.xlsx]. Il se fonde sur la conversion d'un format de métadonnées d'analyse de CNV (GnpCNV). Cet outil permettra donc à un utilisateur de soumettre à dbVar après avoir déposer un fichier GnpCNV dans la base de GnpIS. Il peut être activé optionnellement par le super-job "orchestration" [https://urgi.versailles.inra.fr/jira/browse/GNP-4856].
 
-h2. Resultats
+*Resultats*
 
 -A l'aide d'un tJavaFlex, grâce à la fonction WorkbookFactory.create il va créé un objet depuis le patron de fichier dbVar qu'il faut fournir en paramètre du job d'orchestration (excelFileIn). [{color:red} (!) Par défaut, le fichier est considéré comme présent dans le dossier Talend (défini par context.workdir) sous le nom 'dbVar.xlsx'. Si ce n'est pas le cas il faut l'y copier.{color} ] Ce module permet de boucler sur les onglets et de les instancier dans une variable "sheetName" grâce à la fonction getSheetName de l'objet.
 
