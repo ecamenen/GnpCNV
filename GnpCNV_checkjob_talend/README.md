@@ -1,4 +1,5 @@
-*OBJECTIFS*:
+*OBJECTIFS GENERAUX*:
+---
 * parser en entrée le fichier Excel de métadonnées CNV4Sel fourni par l'utilisateur
 * checker les formats des onglets, les champs obligatoires et l'ontologie des champs statiques
 * séparer les champs utiles (futures métadonnées iRODS) de ceux réservés à une soumission au NCBI
@@ -6,7 +7,7 @@
 
 ---
 *Orchestration*
-
+---
 Ses variables de contexte [^context.properties] sont les suivantes :
 * workdir, le chemin du dossier contenant les fichiers de soumission (ex: /home/ecamenen/Documents/git/GnpCNV/talend)
 * excelFileIn, le nom du fichier Excel de métadonnées d'analyse de CNV soumis par l'utilisateur (GnpCNV); ex: /Pinosioetal2016.xlsx
@@ -18,7 +19,7 @@ Ce job d'orchestration (au nom original 'orchestration') permet d'exécuter un p
 
 ---
 *CheckOrchestration*
-
+---
 *Objectifs*
 Ce Talend vise à vérifier le format GnpCNV (métadonnées d'analyse de CNV) rempli par un utilisateur dans le cadre du projet CNV4Sel. 
 
@@ -68,7 +69,7 @@ Deux catégories d'onglet ont fait l'objet de traitement particulier:
 
 ---
 *convert2dbVar*
-
+---
 *Objectifs*
 
 Ce job Talend ("convert2dbVar") permet au curateur de créer un nouveau fichier au format dbVar (base de variant du NCBI) téléchargeable ici: [https://www.ncbi.nlm.nih.gov/core/assets/dbvar/files/dbVarSubmissionTemplate_v3.3.xlsx]. Il se fonde sur la conversion d'un format de métadonnées d'analyse de CNV (GnpCNV). Cet outil permettra donc à un utilisateur de soumettre à dbVar après avoir déposer un fichier GnpCNV dans la base de GnpIS. Il peut être activé optionnellement par le super-job "orchestration" [https://urgi.versailles.inra.fr/jira/browse/GNP-4856].
