@@ -15,6 +15,7 @@ Ses variables de contexte [^context.properties] sont les suivantes :
 * storageDir, le chemin du dossier où sont stockés les patron des fichiers staticData.tmp et éventuellement dbVar.xlsx (ex: /home/ecamenen/Documents/git/GnpCNV/)
 
 Ce job d'orchestration (au nom original 'orchestration') permet d'exécuter un premier job permettant de vérifier le remplissage du GnpCNV et de créer un fichier CSV de métadonnées de standards "machine readable". Si dbVarSubmit vaut 'yes', un second job est activé et permettant de créer un fichier au format dbVar (base de variant du NCBI) pour une soumission par l'utilisateur.
+
 ---
 *CheckOrchestration*
 
