@@ -18,6 +18,7 @@ Les colonnes suivantes du  [^dbVar.xlsx] sont remplies:
 ---
 
 *ExcelWriter(fileName)* 
+
 hérite de la classe « Workbook » de la libraire « openpyxl» (classe correspondant à un fichier Excel). 
 
 *_Attributs :_*
@@ -29,8 +30,8 @@ _*Méthodes  :*_
 - write() : fonctions save() et close()
 - setCell() : permettant de valuer le contenu de « sheet » avec en entrée la colonne et la ligne de l’Excel ainsi que la valeur à attribuer
 
-
-*VCFParser(vcfFile, excelFilename, idExperiment )*
+---
+h3. *VCFParser(vcfFile, excelFilename, idExperiment )*
 
 *_Attributs :_*
 - idExperiment : l’ID de l’expériment dont est issu l’analyse ayant produit le VCF (champ du fichier de métadonnées Excel)
@@ -45,7 +46,7 @@ _*Méthodes  :*_
 - getAssembly() : parse le VCF pour récupérer dans le header la valeur de la référence si elle est présente, ou, le cas échéant, celle de l’assemblé.
 - parseVCF() : lance sur le VCF une boucle d’itération les « Record2 », elle même lançant une boucle sur les « Calls2 » pour parser les données de chaque variant dans l’Excel.
 
-
+---
 h3. *Record2(record, vcfFile, idExperiment)* 
 *_Attributs :_*
 - « vcfFile », « cptCall » (un compteur du nombre de variants parsés), « idExperiment », « call » un variant (objet « call »), initialisé avec celui en première position de la liste contenue dans l’objet Record2.
@@ -53,7 +54,7 @@ h3. *Record2(record, vcfFile, idExperiment)*
 _*Méthodes  :*_
 - next() : redéfinition de la fonction d’itération de l’objet ; en sortie : un objet correspondant à un variant (Call2)
 - parseChr : parse et formate le numéro du chromosome
-
+---
 *Call2 (call , record , vcfFile, idExperiment, cptCall)*
  *_Attributs :_*
 « vcfFile », « cptCall », « idExperiment » et un attribut de classe « cptVar » incrémenté à chaque instanciation.
